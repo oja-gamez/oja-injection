@@ -1,0 +1,58 @@
+{
+  "name": "@oja-gamez/oja-injection",
+  "version": "0.1.0",
+  "description": "Production-ready Dependency Injection container for Roblox TypeScript",
+  "main": "out/init.luau",
+  "types": "out/index.d.ts",
+  "files": [
+    "out",
+    "src"
+  ],
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "rbxtsc",
+    "watch": "rbxtsc -w",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oja-gamez/oja-game-kit.git",
+    "directory": "packages/oja-injection"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "keywords": [
+    "roblox",
+    "roblox-ts",
+    "dependency-injection",
+    "ioc",
+    "container",
+    "di"
+  ],
+  "author": "Oja Gamez",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/oja-gamez/oja-game-kit/issues"
+  },
+  "homepage": "https://github.com/oja-gamez/oja-game-kit/tree/main/packages/oja-injection#readme",
+  "dependencies": {
+    "@rbxts/services": "^1.5.4",
+    "@rbxts/types": "^1.0.891"
+  },
+  "devDependencies": {
+    "@rbxts/compiler-types": "^3.0.0-types.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "roblox-ts": "^3.0.0",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noLib": true,
+    "moduleDetection": "force",
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "src",
+    "outDir": "out",
+    "typeRoots": [
+      "./node_modules/@rbxts",
+      "./node_modules/@oja-gamez"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "out",
+    "src/Injection/Transformer",
+    "src/Injection/Test.server.ts",
+    "src/Injection/Examples"
+  ]
+}
