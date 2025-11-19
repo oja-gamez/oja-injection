@@ -466,7 +466,6 @@ export class Container {
 	 * - @Inject decorated parameters (explicit tokens)
 	 * - Autowired parameters (type inference)
 	 * - @Runtime decorated parameters (runtime values)
-	 * - @Optional decorated parameters (nullable dependencies)
 	 *
 	 * @param constructor - The constructor whose dependencies to resolve
 	 * @param context - Resolution context for circular dependency detection and error reporting

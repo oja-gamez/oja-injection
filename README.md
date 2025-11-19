@@ -2,13 +2,7 @@
 
 Opinionated dependency injection container for Roblox TypeScript.
 
-## Installation
-
-```bash
-npm install @oja-gamez/oja-injection
-```
-
-## Quick Start
+## Usage
 
 ```ts
 import { Container, ContainerModule, ScopeModule, Single, Scoped, Inject, createToken } from "@oja-gamez/oja-injection"
