@@ -1,31 +1,45 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = _G[script]
 local ScopeRegister = TS.import(script, script.Parent.Parent, "ScopeRegister").ScopeRegister
-local ScopeModule
+--* Builder exposed while defining scope modules. 
+--* Internal representation consumed by the container. 
+local ScopeBuilderImpl
 do
-	ScopeModule = setmetatable({}, {
+	ScopeBuilderImpl = setmetatable({}, {
 		__tostring = function()
-			return "ScopeModule"
+			return "ScopeBuilderImpl"
 		end,
 	})
-	ScopeModule.__index = ScopeModule
-	function ScopeModule.new(...)
-		local self = setmetatable({}, ScopeModule)
+	ScopeBuilderImpl.__index = ScopeBuilderImpl
+	function ScopeBuilderImpl.new(...)
+		local self = setmetatable({}, ScopeBuilderImpl)
 		return self:constructor(...) or self
 	end
-	function ScopeModule:constructor()
-		self._register = ScopeRegister.new()
+	function ScopeBuilderImpl:constructor(register)
+		self.register = register
 	end
-	function ScopeModule:WithRoot(root)
-		self._register:WithRoot(root)
+	function ScopeBuilderImpl:withRoot(root)
+		self.register:WithRoot(root)
 	end
-	function ScopeModule:ProvideExternal(token, data)
-		self._register:ProvideExternal(token, data)
+	function ScopeBuilderImpl:provideExternal(token, data)
+		self.register:ProvideExternal(token, data)
 	end
-	function ScopeModule:_getRegister()
-		return self._register
+end
+--* Factory returned from registerScopeModule. 
+--* Declares a scope module using the builder DSL. 
+local function registerScopeModule(definition)
+	return function(...)
+		local params = { ... }
+		local register = ScopeRegister.new()
+		local builder = ScopeBuilderImpl.new(register)
+		definition(builder, unpack(params))
+		return {
+			_getRegister = function(self)
+				return register
+			end,
+		}
 	end
 end
 return {
-	ScopeModule = ScopeModule,
+	registerScopeModule = registerScopeModule,
 }

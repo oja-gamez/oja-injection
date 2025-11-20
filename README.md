@@ -168,6 +168,49 @@ class PathfindingService implements IWarmupable {
 }
 ```
 
+## Global Tick Management
+
+All `ITickable`, `IFixedTickable`, and `IRenderTickable` services are automatically managed by a **global TickManager**. This provides optimal performance with only **one RunService connection for the entire game**, regardless of how many scopes or tickables exist.
+
+### Automatic Registration
+
+Ticking is completely automatic - just implement the interface:
+
+```ts
+@Scoped()
+class PlayerMovement implements ITickable {
+  Tick(deltaTime: number) {
+    // Called every frame automatically
+    // Registered when scope creates this service
+    // Unregistered when scope is destroyed
+  }
+}
+```
+
+### Performance
+
+- ✅ **One Heartbeat connection** for all ITickable + IFixedTickable services
+- ✅ **One RenderStepped connection** for all IRenderTickable services
+- ✅ **Automatic cleanup** when scopes are destroyed
+- ✅ **Scales to thousands of tickables** without performance issues
+
+### Advanced Control
+
+Access the global TickManager for debugging and control:
+
+```ts
+const container = new Container();
+
+// Pause all ticking globally (useful for debugging)
+container.GetTickManager().Pause();
+container.GetTickManager().Resume();
+
+// Get debug information
+const info = container.GetTickManager().GetDebugInfo();
+print(`Total tickables: ${info.TotalTickables}`);
+print(`Paused: ${info.Paused}`);
+```
+
 ## Scopes
 
 ### Creating Scopes

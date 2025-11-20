@@ -3,6 +3,7 @@ local TS = _G[script]
 local Reflect = TS.import(script, script.Parent.Parent, "Reflection", "Reflect").Reflect
 local MetadataKeys = TS.import(script, script.Parent.Parent, "Reflection", "MetadataKeys").MetadataKeys
 local Scope = TS.import(script, script.Parent, "Scope").Scope
+local TickManager = TS.import(script, script.Parent, "TickManager").TickManager
 local isToken = TS.import(script, script.Parent.Parent, "Tokens", "CreateToken").isToken
 local ContainerErrors = TS.import(script, script.Parent, "ContainerErrors").ContainerErrors
 --[[
@@ -48,6 +49,7 @@ do
 		self._keyedRegistrations = {}
 		self._validated = false
 		self._resolutionLock = false
+		self._tickManager = TickManager.new()
 	end
 	function Container:Use(module)
 		local register = module:_getRegister()
@@ -139,7 +141,7 @@ do
 	end
 	function Container:CreateScope(module)
 		local register = module:_getRegister()
-		local scope = Scope.new(self, nil)
+		local scope = Scope.new(self, self._tickManager, nil)
 		-- Provide external data
 		local externals = register:GetExternals()
 		for token, instance in pairs(externals) do
@@ -152,6 +154,9 @@ do
 			scope:StartAll()
 		end
 		return scope
+	end
+	function Container:GetTickManager()
+		return self._tickManager
 	end
 	function Container:Validate()
 		if self._validated then

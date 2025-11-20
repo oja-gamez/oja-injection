@@ -4,7 +4,6 @@
 	 * Lifecycle interface definitions for service initialization, updates, and cleanup.
 	 
 ]]
--- ===== Destruction Interfaces =====
 --[[
 	*
 	 * Interface for services that need synchronous cleanup when destroyed.
@@ -29,7 +28,6 @@
 	 * }
 	 
 ]]
--- ===== Initialization Interfaces =====
 --[[
 	*
 	 * Interface for services that need synchronous initialization after construction.
@@ -84,7 +82,6 @@
 	 * }
 	 
 ]]
--- ===== Update/Tick Interfaces =====
 --[[
 	*
 	 * Interface for services that need per-frame updates.

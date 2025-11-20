@@ -1,40 +1,73 @@
 -- Compiled with roblox-ts v3.0.0
 local TS = _G[script]
 local ContainerRegister = TS.import(script, script.Parent.Parent, "ContainerRegister").ContainerRegister
-local ContainerModule
+--[[
+	*
+	 * Builder exposed to module definitions.
+	 * Provides helpers for registering services with explicit lifetimes.
+	 
+]]
+--[[
+	*
+	 * Internal module representation consumed by the container.
+	 
+]]
+--[[
+	*
+	 * Module definition function.
+	 
+]]
+local ModuleBuilderImpl
 do
-	ContainerModule = setmetatable({}, {
+	ModuleBuilderImpl = setmetatable({}, {
 		__tostring = function()
-			return "ContainerModule"
+			return "ModuleBuilderImpl"
 		end,
 	})
-	ContainerModule.__index = ContainerModule
-	function ContainerModule.new(...)
-		local self = setmetatable({}, ContainerModule)
+	ModuleBuilderImpl.__index = ModuleBuilderImpl
+	function ModuleBuilderImpl.new(...)
+		local self = setmetatable({}, ModuleBuilderImpl)
 		return self:constructor(...) or self
 	end
-	function ContainerModule:constructor()
-		self._register = ContainerRegister.new()
+	function ModuleBuilderImpl:constructor(register)
+		self.register = register
 	end
-	function ContainerModule:Single(implementation)
-		return self._register:Single(implementation)
+	function ModuleBuilderImpl:single(implementation)
+		return self.register:Single(implementation)
 	end
-	function ContainerModule:Scoped(implementation)
-		return self._register:Scoped(implementation)
+	function ModuleBuilderImpl:scoped(implementation)
+		return self.register:Scoped(implementation)
 	end
-	function ContainerModule:Factory(implementation)
-		return self._register:Factory(implementation)
+	function ModuleBuilderImpl:factory(implementation)
+		return self.register:Factory(implementation)
 	end
-	function ContainerModule:Multi(token, implementations)
-		self._register:Multi(token, implementations)
+	function ModuleBuilderImpl:multi(token, implementations)
+		self.register:Multi(token, implementations)
 	end
-	function ContainerModule:Keyed(token, keyedImplementations)
-		self._register:Keyed(token, keyedImplementations)
-	end
-	function ContainerModule:_getRegister()
-		return self._register
+	function ModuleBuilderImpl:keyed(token, keyedImplementations)
+		self.register:Keyed(token, keyedImplementations)
 	end
 end
+--[[
+	*
+	 * Declares a module using a builder DSL.
+	 *
+	 * @example
+	 * export const LoggingModule = registerModule((m) => {
+	 *     m.single(LoggerService).bind(ILoggerToken);
+	 * });
+	 
+]]
+local function registerModule(definition)
+	local register = ContainerRegister.new()
+	local builder = ModuleBuilderImpl.new(register)
+	definition(builder)
+	return {
+		_getRegister = function(self)
+			return register
+		end,
+	}
+end
 return {
-	ContainerModule = ContainerModule,
+	registerModule = registerModule,
 }

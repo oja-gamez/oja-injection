@@ -5,7 +5,6 @@ local TS = _G[script]
 	 * OjaInjection Scope - Manages scoped service lifetimes
 	 
 ]]
-local RunService = TS.import(script, TS.getModule(script, "@rbxts", "services")).RunService
 local isToken = TS.import(script, script.Parent.Parent, "Tokens", "CreateToken").isToken
 local ContainerErrors = TS.import(script, script.Parent, "ContainerErrors").ContainerErrors
 --[[
@@ -26,7 +25,7 @@ do
 		local self = setmetatable({}, Scope)
 		return self:constructor(...) or self
 	end
-	function Scope:constructor(container, parent, id)
+	function Scope:constructor(container, tickManager, parent, id)
 		self._scopedInstances = {}
 		self._childScopes = {}
 		self._externalInstances = {}
@@ -36,6 +35,7 @@ do
 		self._fixedTickables = {}
 		self._renderTickables = {}
 		self._container = container
+		self._tickManager = tickManager
 		self._parent = parent
 		local _condition = id
 		if not (_condition ~= "" and _condition) then
@@ -101,7 +101,7 @@ do
 		if self._destroyed then
 			error(`Cannot create child scope from destroyed scope: {self._scopeId}`)
 		end
-		local childScope = Scope.new(self._container, self, id)
+		local childScope = Scope.new(self._container, self._tickManager, self, id)
 		local _exp = self._childScopes
 		table.insert(_exp, childScope)
 		return childScope
@@ -120,14 +120,15 @@ do
 		if self._destroyed then
 			return nil
 		end
-		-- Disconnect tick connections
-		local _result = self._heartbeatConnection
-		if _result ~= nil then
-			_result:Disconnect()
+		-- Unregister all tickables from global TickManager
+		for _, tickable in self._tickables do
+			self._tickManager:UnregisterTickable(tickable)
 		end
-		local _result_1 = self._renderSteppedConnection
-		if _result_1 ~= nil then
-			_result_1:Disconnect()
+		for _, tickable in self._fixedTickables do
+			self._tickManager:UnregisterFixedTickable(tickable)
+		end
+		for _, tickable in self._renderTickables do
+			self._tickManager:UnregisterRenderTickable(tickable)
 		end
 		-- Destroy child scopes first
 		for _, child in self._childScopes do
@@ -232,67 +233,26 @@ do
 			local _instance = instance
 			table.insert(__destroyables, _instance)
 		end
-		-- Check for ITickable
+		-- Check for ITickable - register with global TickManager
 		if self:IsTickable(instance) then
 			local __tickables = self._tickables
 			local _instance = instance
 			table.insert(__tickables, _instance)
-			self:EnsureHeartbeatConnection()
+			self._tickManager:RegisterTickable(instance)
 		end
-		-- Check for IFixedTickable
+		-- Check for IFixedTickable - register with global TickManager
 		if self:IsFixedTickable(instance) then
 			local __fixedTickables = self._fixedTickables
 			local _instance = instance
 			table.insert(__fixedTickables, _instance)
-			self:EnsureHeartbeatConnection()
+			self._tickManager:RegisterFixedTickable(instance)
 		end
-		-- Check for IRenderTickable
+		-- Check for IRenderTickable - register with global TickManager
 		if self:IsRenderTickable(instance) then
 			local __renderTickables = self._renderTickables
 			local _instance = instance
 			table.insert(__renderTickables, _instance)
-			self:EnsureRenderSteppedConnection()
-		end
-	end
-	function Scope:EnsureHeartbeatConnection()
-		if not self._heartbeatConnection then
-			self._heartbeatConnection = RunService.Heartbeat:Connect(function(deltaTime)
-				self:TickAll(deltaTime)
-			end)
-		end
-	end
-	function Scope:EnsureRenderSteppedConnection()
-		if not self._renderSteppedConnection and RunService:IsClient() then
-			self._renderSteppedConnection = RunService.RenderStepped:Connect(function(deltaTime)
-				self:RenderTickAll(deltaTime)
-			end)
-		end
-	end
-	function Scope:TickAll(deltaTime)
-		-- Tick ITickable
-		for _, tickable in self._tickables do
-			TS.try(function()
-				tickable:Tick(deltaTime)
-			end, function(e)
-				warn(`Error ticking service in scope {self._scopeId}: {e}`)
-			end)
-		end
-		-- Tick IFixedTickable
-		for _, tickable in self._fixedTickables do
-			TS.try(function()
-				tickable:FixedTick(deltaTime)
-			end, function(e)
-				warn(`Error fixed-ticking service in scope {self._scopeId}: {e}`)
-			end)
-		end
-	end
-	function Scope:RenderTickAll(deltaTime)
-		for _, tickable in self._renderTickables do
-			TS.try(function()
-				tickable:RenderTick(deltaTime)
-			end, function(e)
-				warn(`Error render-ticking service in scope {self._scopeId}: {e}`)
-			end)
+			self._tickManager:RegisterRenderTickable(instance)
 		end
 	end
 	function Scope:IsStartable(value)

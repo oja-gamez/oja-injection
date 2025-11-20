@@ -13,7 +13,7 @@ local exports = {}
 -- Lifecycle interfaces
 -- Factory types
 -- Module types
-exports.ContainerModule = TS.import(script, script, "ContainerModule").ContainerModule
-exports.ScopeModule = TS.import(script, script, "ScopeModule").ScopeModule
+exports.registerModule = TS.import(script, script, "ContainerModule").registerModule
+exports.registerScopeModule = TS.import(script, script, "ScopeModule").registerScopeModule
 -- Diagnostic types
 return exports

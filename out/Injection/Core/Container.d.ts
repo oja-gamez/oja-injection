@@ -1,7 +1,8 @@
 import type { ServiceRegistration } from "../Module/Module";
-import type { Token, Constructor, ContainerModule, ScopeModule } from "./Types";
+import type { Token, Constructor, RegisteredModule, RegisteredScopeModule } from "./Types";
 import type { ResolutionContext } from "./Types/Diagnostics";
 import { Scope } from "./Scope";
+import { TickManager } from "./TickManager";
 /**
  * Main dependency injection container.
  *
@@ -31,26 +32,25 @@ export declare class Container {
     private _keyedRegistrations;
     private _validated;
     private _resolutionLock;
+    private _tickManager;
     constructor();
     /**
-     * Registers services from a module into the container.
+     * Registers services from a module definition.
      *
-     * @param module - ContainerModule instance
+     * @param module - Result of registerModule()
      *
      * @example
      * ```ts
-     * class GameModule extends ContainerModule {
-     *   constructor() {
-     *     this.Single(AudioManager)
-     *     this.Single(ConsoleLogger).Bind(ILogger)
-     *     this.Scoped(PlayerStats)
-     *   }
-     * }
+     * const GameModule = registerModule((m) => {
+     *   m.single(AudioManager)
+     *   m.single(ConsoleLogger).bind(ILogger)
+     *   m.scoped(PlayerStats)
+     * })
      *
-     * container.Use(new GameModule())
+     * container.Use(GameModule)
      * ```
      */
-    Use(module: ContainerModule): void;
+    Use(module: RegisteredModule): void;
     /**
      * Launches the application by auto-resolving all singleton services implementing IStartable.
      *
@@ -98,21 +98,33 @@ export declare class Container {
     /**
      * Creates a new scope for scoped services.
      *
-     * @param module - ScopeModule instance
+     * @param module - Result of registerScopeModule()
      *
      * @example
      * ```ts
-     * class PlayerScopeModule extends ScopeModule {
-     *   constructor(private player: Player) {
-     *     this.WithRoot(PlayerController)
-     *     this.ProvideExternal(PlayerToken, player)
-     *   }
-     * }
+     * const PlayerScope = registerScopeModule((scope, player: Player) => {
+     *   scope.withRoot(PlayerController)
+     *   scope.provideExternal(PlayerToken, player)
+     * })
      *
-     * const scope = container.CreateScope(new PlayerScopeModule(player))
+     * const scope = container.CreateScope(PlayerScope(player))
      * ```
      */
-    CreateScope(module: ScopeModule): Scope;
+    CreateScope(module: RegisteredScopeModule): Scope;
+    /**
+     * Gets the global TickManager for advanced control (pausing, profiling, etc.).
+     *
+     * @example
+     * ```ts
+     * // Pause all ticking globally
+     * container.GetTickManager().Pause();
+     *
+     * // Get debug info
+     * const info = container.GetTickManager().GetDebugInfo();
+     * print(`Total tickables: ${info.TotalTickables}`);
+     * ```
+     */
+    GetTickManager(): TickManager;
     /**
      * Validates the dependency graph for all registered services.
      *
@@ -212,6 +224,7 @@ export declare class Container {
      * - @Inject decorated parameters (explicit tokens)
      * - Autowired parameters (type inference)
      * - @Runtime decorated parameters (runtime values)
+     * - @Optional decorated parameters (nullable dependencies)
      *
      * @param constructor - The constructor whose dependencies to resolve
      * @param context - Resolution context for circular dependency detection and error reporting

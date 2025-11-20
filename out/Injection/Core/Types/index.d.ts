@@ -7,7 +7,9 @@ export type { Token } from "./Tokens";
 export type { Lifetime } from "./Lifetimes";
 export type { IDestroyable, IStartable, IWarmupable, ITickable, IFixedTickable, IRenderTickable, } from "./Lifecycle";
 export type { FactoryFunction, KeyedFactory } from "./Factories";
-export { ContainerModule } from "./ContainerModule";
-export { ScopeModule } from "./ScopeModule";
+export { registerModule } from "./ContainerModule";
+export type { ModuleBuilder, ModuleDefinition, RegisteredModule } from "./ContainerModule";
+export { registerScopeModule } from "./ScopeModule";
+export type { ScopeBuilder, RegisteredScopeModule, ScopeModuleFactory } from "./ScopeModule";
 export type { ServiceDebugInfo, IScopeDebugInfo, ResolutionContext, ContainerErrorInfo } from "./Diagnostics";
 //# sourceMappingURL=index.d.ts.map

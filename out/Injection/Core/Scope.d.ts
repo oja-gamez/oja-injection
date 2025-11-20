@@ -2,6 +2,7 @@
  * OjaInjection Scope - Manages scoped service lifetimes
  */
 import type { Container } from "./Container";
+import type { TickManager } from "./TickManager";
 import type { Token, Constructor, IScopeDebugInfo } from "./Types";
 import type { ResolutionContext } from "./Types/Diagnostics";
 /**
@@ -10,23 +11,27 @@ import type { ResolutionContext } from "./Types/Diagnostics";
  */
 export declare class Scope {
     private _container;
+    private _tickManager;
     private _parent?;
     private _scopeId;
     private _createdAt;
+    /** Scoped instances cached in this scope. */
     private _scopedInstances;
+    /** Child scopes created from this scope. */
     private _childScopes;
+    /** Externally provided instances injected into this scope. */
     private _externalInstances;
+    /** Tracks lifecycle state for destruction/startup. */
     private _destroyed;
     private _destroyables;
+    /** Tickable collections tracked for cleanup - registered with global TickManager. */
     private _tickables;
     private _fixedTickables;
     private _renderTickables;
-    private _heartbeatConnection?;
-    private _renderSteppedConnection?;
     /**
      * @internal
      */
-    constructor(container: Container, parent?: Scope, id?: string);
+    constructor(container: Container, tickManager: TickManager, parent?: Scope, id?: string);
     /**
      * Resolves a service from this scope.
      * @internal - Not exposed on IScope interface
@@ -75,22 +80,6 @@ export declare class Scope {
      * @internal
      */
     private TrackInstance;
-    /**
-     * Ensures Heartbeat connection exists.
-     */
-    private EnsureHeartbeatConnection;
-    /**
-     * Ensures RenderStepped connection exists.
-     */
-    private EnsureRenderSteppedConnection;
-    /**
-     * Ticks all tickables in this scope.
-     */
-    private TickAll;
-    /**
-     * Render ticks all render tickables in this scope.
-     */
-    private RenderTickAll;
     private IsStartable;
     private IsDestroyable;
     private IsTickable;
