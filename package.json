@@ -43,7 +43,7 @@
   },
   "homepage": "https://github.com/oja-gamez/oja-game-kit/tree/main/packages/oja-injection#readme",
   "dependencies": {
-    "@rbxts/services": "^1.5.4",
+    "@rbxts/services": "^1.6.0",
     "@rbxts/types": "^1.0.891"
   },
   "devDependencies": {
