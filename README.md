@@ -5,7 +5,7 @@ Opinionated dependency injection container for Roblox TypeScript.
 ## Usage
 
 ```ts
-import { Container, ContainerModule, ScopeModule, Single, Scoped, Inject, createToken } from "@oja-gamez/oja-injection"
+import { Container, registerModule, registerScopeModule, Single, Scoped, Inject, createToken } from "@oja-gamez/oja-injection"
 
 // Define services
 @Single()
@@ -21,29 +21,25 @@ class PlayerStats {
 }
 
 // Register services
-class GameServices extends ContainerModule {
-  constructor() {
-    this.Single(AudioManager)
-    this.Scoped(PlayerStats)
-  }
-}
+const GameServices = registerModule((m) => {
+  m.single(AudioManager)
+  m.scoped(PlayerStats)
+})
 
 // Create container
 const container = new Container()
-container.Use(new GameServices())
+container.use(GameServices)
 
 // Create scopes
 const PlayerToken = createToken<Player>("Player")
 
-class PlayerScopeModule extends ScopeModule {
-  constructor(private player: Player) {
-    this.WithRoot(PlayerStats)
-    this.ProvideExternal(PlayerToken, player)
-  }
-}
+const PlayerScopeModule = registerScopeModule((scope, player: Player) => {
+  scope.withRoot(PlayerStats)
+  scope.provideExternal(PlayerToken, player)
+})
 
 Players.PlayerAdded.Connect((player) => {
-  const scope = container.CreateScope(new PlayerScopeModule(player))
+  const scope = container.createScope(PlayerScopeModule, player)
 
   player.AncestryChanged.Connect(() => {
     if (!player.IsDescendantOf(game)) {
@@ -104,11 +100,9 @@ class CombatSystem {
 ```ts
 const ILogger = createToken<Logger>("ILogger")
 
-class GameServices extends ContainerModule {
-  constructor() {
-    this.Single(ConsoleLogger).Bind(ILogger)  // Implementation → Interface
-  }
-}
+const GameServices = registerModule((m) => {
+  m.single(ConsoleLogger).bind(ILogger)  // Implementation → Interface
+})
 
 @Single()
 class ErrorHandler {
@@ -216,18 +210,13 @@ print(`Paused: ${info.Paused}`);
 ### Creating Scopes
 
 ```ts
-class PlayerScopeModule extends ScopeModule {
-  constructor(
-    private player: Player,
-    private profile: PlayerProfile
-  ) {
-    this.WithRoot(PlayerController)  // Entry point - eagerly resolved
-    this.ProvideExternal(PlayerToken, player)
-    this.ProvideExternal(ProfileToken, profile)
-  }
-}
+const PlayerScopeModule = registerScopeModule((scope, player: Player, profile: PlayerProfile) => {
+  scope.withRoot(PlayerController)  // Entry point - eagerly resolved
+  scope.provideExternal(PlayerToken, player)
+  scope.provideExternal(ProfileToken, profile)
+})
 
-const scope = container.CreateScope(new PlayerScopeModule(player, profile))
+const scope = container.createScope(PlayerScopeModule, player, profile)
 ```
 
 ### External Data
@@ -238,16 +227,11 @@ Provide runtime data to scopes:
 const PlayerToken = createToken<Player>("Player")
 const ProfileToken = createToken<PlayerProfile>("Profile")
 
-class PlayerScopeModule extends ScopeModule {
-  constructor(
-    private player: Player,
-    private profile: PlayerProfile
-  ) {
-    this.WithRoot(PlayerController)
-    this.ProvideExternal(PlayerToken, player)
-    this.ProvideExternal(ProfileToken, profile)
-  }
-}
+const PlayerScopeModule = registerScopeModule((scope, player: Player, profile: PlayerProfile) => {
+  scope.withRoot(PlayerController)
+  scope.provideExternal(PlayerToken, player)
+  scope.provideExternal(ProfileToken, profile)
+})
 
 @Scoped()
 class PlayerData {
@@ -265,11 +249,9 @@ Inject arrays of implementations:
 ```ts
 const IPlugin = createToken<Plugin>("IPlugin")
 
-class GameServices extends ContainerModule {
-  constructor() {
-    this.Multi(IPlugin, [AnalyticsPlugin, TeleportPlugin, ShopPlugin])
-  }
-}
+const GameServices = registerModule((m) => {
+  m.multi(IPlugin, [AnalyticsPlugin, TeleportPlugin, ShopPlugin])
+})
 
 @Single()
 class PluginManager {
@@ -286,15 +268,13 @@ Inject factories for runtime resolution:
 ```ts
 const IWeapon = createToken<Weapon>("IWeapon")
 
-class GameServices extends ContainerModule {
-  constructor() {
-    this.Keyed(IWeapon, {
-      Sword: SwordWeapon,
-      Bow: BowWeapon,
-      Staff: StaffWeapon
-    })
-  }
-}
+const GameServices = registerModule((m) => {
+  m.keyed(IWeapon, {
+    Sword: SwordWeapon,
+    Bow: BowWeapon,
+    Staff: StaffWeapon
+  })
+})
 
 @Scoped()
 class WeaponSystem {
@@ -312,7 +292,7 @@ class WeaponSystem {
 ```ts
 // Good - load async data first
 const profile = await ProfileStore.LoadAsync(player.UserId)
-const scope = container.CreateScope(new PlayerScopeModule(player, profile))
+const scope = container.createScope(PlayerScopeModule, player, profile)
 
 // Bad - don't load async data in services
 @Scoped()
@@ -329,11 +309,9 @@ class BadService {
 // Good - depend on abstraction
 const IDataStore = createToken<DataStore>("IDataStore")
 
-class GameServices extends ContainerModule {
-  constructor() {
-    this.Single(ProfileStoreImpl).Bind(IDataStore)
-  }
-}
+const GameServices = registerModule((m) => {
+  m.single(ProfileStoreImpl).bind(IDataStore)
+})
 
 @Single()
 class UserService {

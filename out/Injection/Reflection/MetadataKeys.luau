@@ -11,14 +11,9 @@ local MetadataKeys = {
 	Dependencies = "oja:dependencies",
 	DependencyTokens = "oja:dependency-tokens",
 	RuntimeParameters = "oja:runtime-parameters",
-	IsMulti = "oja:is-multi",
-	KeyedImplementations = "oja:keyed-implementations",
-	Implements = "oja:implements",
 	ServiceName = "oja:service-name",
 	CreatedAt = "oja:created-at",
 	ScopeId = "oja:scope-id",
-	Validated = "oja:validated",
-	CircularDependencies = "oja:circular-dependencies",
 }
 --[[
 	*

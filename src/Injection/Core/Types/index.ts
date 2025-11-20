@@ -16,7 +16,6 @@ export type { Lifetime } from "./Lifetimes";
 export type {
 	IDestroyable,
 	IStartable,
-	IWarmupable,
 	ITickable,
 	IFixedTickable,
 	IRenderTickable,

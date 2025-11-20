@@ -5,7 +5,7 @@
 export type { Constructor, AbstractConstructor } from "./Constructors";
 export type { Token } from "./Tokens";
 export type { Lifetime } from "./Lifetimes";
-export type { IDestroyable, IStartable, IWarmupable, ITickable, IFixedTickable, IRenderTickable, } from "./Lifecycle";
+export type { IDestroyable, IStartable, ITickable, IFixedTickable, IRenderTickable, } from "./Lifecycle";
 export type { FactoryFunction, KeyedFactory } from "./Factories";
 export { registerModule } from "./ContainerModule";
 export type { ModuleBuilder, ModuleDefinition, RegisteredModule } from "./ContainerModule";

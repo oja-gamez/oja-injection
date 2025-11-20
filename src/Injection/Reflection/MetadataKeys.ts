@@ -31,25 +31,6 @@ export const MetadataKeys = {
 	RuntimeParameters: "oja:runtime-parameters",
 
 	/**
-	 * Boolean indicating this token expects array of all implementations
-	 * Set during module registration with multi()
-	 */
-	IsMulti: "oja:is-multi",
-
-	/**
-	 * Map of keys to implementations for keyed() registration
-	 * Example: { "fireball": FireballPrototype, "icebolt": IceBoltPrototype }
-	 */
-	KeyedImplementations: "oja:keyed-implementations",
-
-	/**
-	 * Array of interface names this class implements
-	 * Used for detecting IDestroyable, IAsyncInitializable, etc.
-	 * Example: ["IDestroyable", "IAsyncInitializable"]
-	 */
-	Implements: "oja:implements",
-
-	/**
 	 * Human-readable service name for debugging
 	 * Auto-set from class name, used by DebugServices()
 	 */
@@ -66,18 +47,6 @@ export const MetadataKeys = {
 	 * Used for debugging and leak detection
 	 */
 	ScopeId: "oja:scope-id",
-
-	/**
-	 * Boolean indicating this service has been validated
-	 * Set during container validation to avoid duplicate checks
-	 */
-	Validated: "oja:validated",
-
-	/**
-	 * Array of circular dependency chains detected for this service
-	 * Used for error reporting
-	 */
-	CircularDependencies: "oja:circular-dependencies",
 } as const;
 
 /**

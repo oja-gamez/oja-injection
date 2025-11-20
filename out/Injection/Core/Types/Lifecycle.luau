@@ -54,36 +54,6 @@
 ]]
 --[[
 	*
-	 * Interface for services that need CPU-intensive pre-computation during container bootstrap.
-	 *
-	 * ONLY for singleton services - scoped/factory services don't get warmup lifecycle.
-	 * Container calls Warmup() before IStartable.
-	 *
-	 * Use for CPU-bound work (navmesh, parsing, pre-computation).
-	 *
-	 * Work should complete in reasonable time (seconds). If warmup takes 10+ seconds,
-	 * consider whether it should be in bootstrap or deferred to lazy initialization.
-	 *
-	 * @example
-	 * @Single()
-	 * class PathfindingService implements IWarmupable {
-	 *     private navmesh!: Navmesh;
-	 *
-	 *     Warmup(): void {
-	 *         // Build navmesh during startup (2 seconds of CPU work)
-	 *         this.navmesh = this.BuildNavmesh();
-	 *         print("Navmesh pre-computed");
-	 *     }
-	 *
-	 *     FindPath(start: Vector3, end: Vector3): Vector3[] {
-	 *         // Instant - navmesh already built
-	 *         return this.navmesh.FindPath(start, end);
-	 *     }
-	 * }
-	 
-]]
---[[
-	*
 	 * Interface for services that need per-frame updates.
 	 * Container/Scope connects to RunService.Heartbeat ONCE and calls all tickables.
 	 *
