@@ -337,6 +337,68 @@ Players.PlayerRemoving.Connect((player) => {
 })
 ```
 
+## Advanced API
+
+### Scope Class
+
+The `Scope` class is returned by `container.createScope()` and provides lifecycle management for scoped services.
+
+**Methods:**
+
+- `Destroy()` - Destroys the scope and all its services. Calls `IDestroyable.Destroy()` on all services that implement it.
+- `GetScopeId()` - Returns the unique ID of this scope (useful for debugging).
+- `DebugServices()` - Returns debug information about all services in this scope.
+
+**Example:**
+
+```ts
+const scope = container.createScope(PlayerScopeModule, player)
+
+// Get scope ID for logging
+const scopeId = scope.GetScopeId()
+print(`Created scope: ${scopeId}`)
+
+// Debug services
+const debugInfo = scope.DebugServices()
+print(`Scope has ${debugInfo.Services.size()} services`)
+
+// Clean up when done
+scope.Destroy()
+```
+
+### TickManager
+
+Global tick manager that handles all `ITickable`, `IFixedTickable`, and `IRenderTickable` services. Access via `container.GetTickManager()`.
+
+**Methods:**
+
+- `Pause()` - Pauses all ticking globally (useful for pausing game logic).
+- `Resume()` - Resumes all ticking.
+- `IsPaused()` - Returns whether ticking is currently paused.
+- `GetDebugInfo()` - Returns diagnostic information about registered tickables.
+
+**Example:**
+
+```ts
+const tickManager = container.GetTickManager()
+
+// Pause game logic (e.g., when opening pause menu)
+tickManager.Pause()
+
+// Resume
+tickManager.Resume()
+
+// Debug tickable services
+const debugInfo = tickManager.GetDebugInfo()
+print(`Tickables: ${debugInfo.TickableCount}`)
+print(`Fixed Tickables: ${debugInfo.FixedTickableCount}`)
+print(`Paused: ${debugInfo.Paused}`)
+```
+
+**Performance Note:**
+
+OjaInjection uses **one Heartbeat connection** and **one RenderStepped connection** for the entire game, regardless of how many tickable services you have. This is significantly more efficient than creating individual connections per service.
+
 ## License
 
 ISC
