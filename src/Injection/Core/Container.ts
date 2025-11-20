@@ -2,9 +2,10 @@ import { Players } from "@rbxts/services";
 import { Reflect } from "../Reflection/Reflect";
 import { MetadataKeys } from "../Reflection/MetadataKeys";
 import type { ServiceRegistration } from "../Module/Module";
-import type { Token, Constructor, Lifetime, KeyedFactory, ContainerModule, ScopeModule } from "./Types";
+import type { Token, Constructor, Lifetime, KeyedFactory, RegisteredModule, RegisteredScopeModule } from "./Types";
 import type { ResolutionContext } from "./Types/Diagnostics";
 import { Scope } from "./Scope";
+import { TickManager } from "./TickManager";
 import { isToken } from "../Tokens/CreateToken";
 import { ContainerErrors } from "./ContainerErrors";
 
@@ -37,28 +38,29 @@ export class Container {
 	private _keyedRegistrations = new Map<Token, Map<string, Constructor>>();
 	private _validated = false;
 	private _resolutionLock = false;
+	private _tickManager: TickManager;
 
-	constructor() {}
+	constructor() {
+		this._tickManager = new TickManager();
+	}
 
 	/**
-	 * Registers services from a module into the container.
+	 * Registers services from a module definition.
 	 *
-	 * @param module - ContainerModule instance
+	 * @param module - Result of registerModule()
 	 *
 	 * @example
 	 * ```ts
-	 * class GameModule extends ContainerModule {
-	 *   constructor() {
-	 *     this.Single(AudioManager)
-	 *     this.Single(ConsoleLogger).Bind(ILogger)
-	 *     this.Scoped(PlayerStats)
-	 *   }
-	 * }
+	 * const GameModule = registerModule((m) => {
+	 *   m.single(AudioManager)
+	 *   m.single(ConsoleLogger).bind(ILogger)
+	 *   m.scoped(PlayerStats)
+	 * })
 	 *
-	 * container.Use(new GameModule())
+	 * container.Use(GameModule)
 	 * ```
 	 */
-	Use(module: ContainerModule): void {
+	Use(module: RegisteredModule): void {
 		const register = module._getRegister();
 
 		// Process single/scoped/factory registrations
@@ -199,23 +201,21 @@ export class Container {
 	/**
 	 * Creates a new scope for scoped services.
 	 *
-	 * @param module - ScopeModule instance
+	 * @param module - Result of registerScopeModule()
 	 *
 	 * @example
 	 * ```ts
-	 * class PlayerScopeModule extends ScopeModule {
-	 *   constructor(private player: Player) {
-	 *     this.WithRoot(PlayerController)
-	 *     this.ProvideExternal(PlayerToken, player)
-	 *   }
-	 * }
+	 * const PlayerScope = registerScopeModule((scope, player: Player) => {
+	 *   scope.withRoot(PlayerController)
+	 *   scope.provideExternal(PlayerToken, player)
+	 * })
 	 *
-	 * const scope = container.CreateScope(new PlayerScopeModule(player))
+	 * const scope = container.CreateScope(PlayerScope(player))
 	 * ```
 	 */
-	CreateScope(module: ScopeModule): Scope {
+	CreateScope(module: RegisteredScopeModule): Scope {
 		const register = module._getRegister();
-		const scope = new Scope(this, undefined) as Scope;
+		const scope = new Scope(this, this._tickManager, undefined) as Scope;
 
 		// Provide external data
 		const externals = register.GetExternals();
@@ -233,6 +233,22 @@ export class Container {
 		return scope;
 	}
 
+	/**
+	 * Gets the global TickManager for advanced control (pausing, profiling, etc.).
+	 *
+	 * @example
+	 * ```ts
+	 * // Pause all ticking globally
+	 * container.GetTickManager().Pause();
+	 *
+	 * // Get debug info
+	 * const info = container.GetTickManager().GetDebugInfo();
+	 * print(`Total tickables: ${info.TotalTickables}`);
+	 * ```
+	 */
+	GetTickManager(): TickManager {
+		return this._tickManager;
+	}
 
 	/**
 	 * Validates the dependency graph for all registered services.
@@ -466,6 +482,7 @@ export class Container {
 	 * - @Inject decorated parameters (explicit tokens)
 	 * - Autowired parameters (type inference)
 	 * - @Runtime decorated parameters (runtime values)
+	 * - @Optional decorated parameters (nullable dependencies)
 	 *
 	 * @param constructor - The constructor whose dependencies to resolve
 	 * @param context - Resolution context for circular dependency detection and error reporting

@@ -1,4 +1,4 @@
-// ===== Core Types =====
+/** Public API surface for OjaInjection. */
 export type {
 	Constructor,
 	Token,
@@ -14,15 +14,10 @@ export type {
 	IScopeDebugInfo,
 } from "./Injection/Core/Types";
 
-export { ContainerModule, ScopeModule } from "./Injection/Core/Types";
-
-// ===== Tokens =====
+export { registerModule, registerScopeModule } from "./Injection/Core/Types";
 export { createToken } from "./Injection/Tokens/CreateToken";
-
-// ===== Decorators =====
 export { Single, Scoped, Factory } from "./Injection/Decorators/Lifetime";
 export { Inject, RuntimeParameter } from "./Injection/Decorators/Injection";
-
-// ===== Container & Scope =====
 export { Container } from "./Injection/Core/Container";
 export { Scope } from "./Injection/Core/Scope";
+export { TickManager } from "./Injection/Core/TickManager";

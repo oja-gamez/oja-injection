@@ -2,8 +2,8 @@
  * OjaInjection Scope - Manages scoped service lifetimes
  */
 
-import { RunService } from "@rbxts/services";
 import type { Container } from "./Container";
+import type { TickManager } from "./TickManager";
 import type { Token, Constructor, IScopeDebugInfo, IDestroyable, IStartable, ITickable, IFixedTickable, IRenderTickable } from "./Types";
 import type { ResolutionContext } from "./Types/Diagnostics";
 import { isToken } from "../Tokens/CreateToken";
@@ -15,35 +15,35 @@ import { ContainerErrors } from "./ContainerErrors";
  */
 export class Scope {
 	private _container: Container;
+	private _tickManager: TickManager;
 	private _parent?: Scope;
 	private _scopeId: string;
 	private _createdAt: number;
 
-	// Scoped instances cached in this scope
+	/** Scoped instances cached in this scope. */
 	private _scopedInstances = new Map<Token | Constructor, unknown>();
 
-	// Child scopes
+	/** Child scopes created from this scope. */
 	private _childScopes: Scope[] = [];
 
-	// Externally provided instances
+	/** Externally provided instances injected into this scope. */
 	private _externalInstances = new Map<Token | Constructor, unknown>();
 
-	// Lifecycle tracking
+	/** Tracks lifecycle state for destruction/startup. */
 	private _destroyed = false;
 	private _destroyables: IDestroyable[] = [];
 
-	// Tick management
+	/** Tickable collections tracked for cleanup - registered with global TickManager. */
 	private _tickables: ITickable[] = [];
 	private _fixedTickables: IFixedTickable[] = [];
 	private _renderTickables: IRenderTickable[] = [];
-	private _heartbeatConnection?: RBXScriptConnection;
-	private _renderSteppedConnection?: RBXScriptConnection;
 
 	/**
 	 * @internal
 	 */
-	constructor(container: Container, parent?: Scope, id?: string) {
+	constructor(container: Container, tickManager: TickManager, parent?: Scope, id?: string) {
 		this._container = container;
+		this._tickManager = tickManager;
 		this._parent = parent;
 		this._scopeId = id || `scope-${os.time()}-${math.random()}`;
 		this._createdAt = os.clock();
@@ -116,7 +116,7 @@ export class Scope {
 			error(`Cannot create child scope from destroyed scope: ${this._scopeId}`);
 		}
 
-		const childScope = new Scope(this._container, this, id);
+		const childScope = new Scope(this._container, this._tickManager, this, id);
 		this._childScopes.push(childScope);
 		return childScope;
 	}
@@ -140,9 +140,16 @@ export class Scope {
 	Destroy(): void {
 		if (this._destroyed) return;
 
-		// Disconnect tick connections
-		this._heartbeatConnection?.Disconnect();
-		this._renderSteppedConnection?.Disconnect();
+		// Unregister all tickables from global TickManager
+		for (const tickable of this._tickables) {
+			this._tickManager.UnregisterTickable(tickable);
+		}
+		for (const tickable of this._fixedTickables) {
+			this._tickManager.UnregisterFixedTickable(tickable);
+		}
+		for (const tickable of this._renderTickables) {
+			this._tickManager.UnregisterRenderTickable(tickable);
+		}
 
 		// Destroy child scopes first
 		for (const child of this._childScopes) {
@@ -213,8 +220,6 @@ export class Scope {
 		return this._scopeId;
 	}
 
-	// ===== Internal Methods =====
-
 	/**
 	 * Starts all IStartable instances synchronously.
 	 * Call this after resolving all services in the scope.
@@ -258,84 +263,24 @@ export class Scope {
 			this._destroyables.push(instance);
 		}
 
-		// Check for ITickable
+		// Check for ITickable - register with global TickManager
 		if (this.IsTickable(instance)) {
 			this._tickables.push(instance);
-			this.EnsureHeartbeatConnection();
+			this._tickManager.RegisterTickable(instance);
 		}
 
-		// Check for IFixedTickable
+		// Check for IFixedTickable - register with global TickManager
 		if (this.IsFixedTickable(instance)) {
 			this._fixedTickables.push(instance);
-			this.EnsureHeartbeatConnection();
+			this._tickManager.RegisterFixedTickable(instance);
 		}
 
-		// Check for IRenderTickable
+		// Check for IRenderTickable - register with global TickManager
 		if (this.IsRenderTickable(instance)) {
 			this._renderTickables.push(instance);
-			this.EnsureRenderSteppedConnection();
+			this._tickManager.RegisterRenderTickable(instance);
 		}
 	}
-
-	/**
-	 * Ensures Heartbeat connection exists.
-	 */
-	private EnsureHeartbeatConnection(): void {
-		if (!this._heartbeatConnection) {
-			this._heartbeatConnection = RunService.Heartbeat.Connect((deltaTime) => {
-				this.TickAll(deltaTime);
-			});
-		}
-	}
-
-	/**
-	 * Ensures RenderStepped connection exists.
-	 */
-	private EnsureRenderSteppedConnection(): void {
-		if (!this._renderSteppedConnection && RunService.IsClient()) {
-			this._renderSteppedConnection = RunService.RenderStepped.Connect((deltaTime) => {
-				this.RenderTickAll(deltaTime);
-			});
-		}
-	}
-
-	/**
-	 * Ticks all tickables in this scope.
-	 */
-	private TickAll(deltaTime: number): void {
-		// Tick ITickable
-		for (const tickable of this._tickables) {
-			try {
-				tickable.Tick(deltaTime);
-			} catch (e) {
-				warn(`Error ticking service in scope ${this._scopeId}: ${e}`);
-			}
-		}
-
-		// Tick IFixedTickable
-		for (const tickable of this._fixedTickables) {
-			try {
-				tickable.FixedTick(deltaTime);
-			} catch (e) {
-				warn(`Error fixed-ticking service in scope ${this._scopeId}: ${e}`);
-			}
-		}
-	}
-
-	/**
-	 * Render ticks all render tickables in this scope.
-	 */
-	private RenderTickAll(deltaTime: number): void {
-		for (const tickable of this._renderTickables) {
-			try {
-				tickable.RenderTick(deltaTime);
-			} catch (e) {
-				warn(`Error render-ticking service in scope ${this._scopeId}: ${e}`);
-			}
-		}
-	}
-
-	// ===== Type Guards =====
 
 	private IsStartable(value: unknown): value is IStartable {
 		return typeIs(value, "table") && typeIs((value as IStartable).Start, "function");

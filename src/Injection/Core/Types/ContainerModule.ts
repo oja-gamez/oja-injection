@@ -2,31 +2,80 @@ import type { Constructor, Token } from "./";
 import { ContainerRegister } from "../ContainerRegister";
 import type { BindingBuilder } from "../BindingBuilder";
 
-export class ContainerModule {
-	private readonly _register = new ContainerRegister();
+/**
+ * Builder exposed to module definitions.
+ * Provides helpers for registering services with explicit lifetimes.
+ */
+export interface ModuleBuilder {
+    /** Registers a singleton service. */
+    single(implementation: Constructor): BindingBuilder;
 
-	protected Single(implementation: Constructor): BindingBuilder {
-		return this._register.Single(implementation);
-	}
+    /** Registers a scoped service. */
+    scoped(implementation: Constructor): BindingBuilder;
 
-	protected Scoped(implementation: Constructor): BindingBuilder {
-		return this._register.Scoped(implementation);
-	}
+    /** Registers a factory service (new instance per injection). */
+    factory(implementation: Constructor): BindingBuilder;
 
-	protected Factory(implementation: Constructor): BindingBuilder {
-		return this._register.Factory(implementation);
-	}
+    /** Registers multiple implementations for a token. */
+    multi(token: Token, implementations: Constructor[]): void;
 
-	protected Multi(token: Token, implementations: Constructor[]): void {
-		this._register.Multi(token, implementations);
-	}
+    /** Registers keyed implementations for runtime lookup. */
+    keyed(token: Token, keyedImplementations: Record<string, Constructor>): void;
+}
 
-	protected Keyed(token: Token, keyedImplementations: Record<string, Constructor>): void {
-		this._register.Keyed(token, keyedImplementations);
-	}
+/**
+ * Internal module representation consumed by the container.
+ */
+export interface RegisteredModule {
+    /** @internal */
+    _getRegister(): ContainerRegister;
+}
 
-	/** @internal */
-	_getRegister(): ContainerRegister {
-		return this._register;
-	}
+/**
+ * Module definition function.
+ */
+export type ModuleDefinition = (builder: ModuleBuilder) => void;
+
+class ModuleBuilderImpl implements ModuleBuilder {
+    constructor(private readonly register: ContainerRegister) {}
+
+    single(implementation: Constructor): BindingBuilder {
+        return this.register.Single(implementation);
+    }
+
+    scoped(implementation: Constructor): BindingBuilder {
+        return this.register.Scoped(implementation);
+    }
+
+    factory(implementation: Constructor): BindingBuilder {
+        return this.register.Factory(implementation);
+    }
+
+    multi(token: Token, implementations: Constructor[]): void {
+        this.register.Multi(token, implementations);
+    }
+
+    keyed(token: Token, keyedImplementations: Record<string, Constructor>): void {
+        this.register.Keyed(token, keyedImplementations);
+    }
+}
+
+/**
+ * Declares a module using a builder DSL.
+ *
+ * @example
+ * export const LoggingModule = registerModule((m) => {
+ *     m.single(LoggerService).bind(ILoggerToken);
+ * });
+ */
+export function registerModule(definition: ModuleDefinition): RegisteredModule {
+    const register = new ContainerRegister();
+    const builder = new ModuleBuilderImpl(register);
+    definition(builder);
+
+    return {
+        _getRegister() {
+            return register;
+        },
+    };
 }

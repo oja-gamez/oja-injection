@@ -4,15 +4,11 @@
  * All keys prefixed with "oja:" to avoid conflicts with other libraries.
  */
 export const MetadataKeys = {
-	// ===== Lifetime Management =====
-
 	/**
 	 * Service lifetime: "singleton" | "scoped" | "factory"
 	 * Set by @Singleton(), @Scoped(), @Factory() decorators
 	 */
 	Lifetime: "oja:lifetime",
-
-	// ===== Dependency Injection =====
 
 	/**
 	 * Array of constructor parameter types (auto-detected by TypeScript)
@@ -27,8 +23,6 @@ export const MetadataKeys = {
 	 */
 	DependencyTokens: "oja:dependency-tokens",
 
-	// ===== Runtime Parameters =====
-
 	/**
 	 * Array of parameter indices marked as runtime parameters
 	 * Set by @RuntimeParameter() decorator
@@ -36,15 +30,11 @@ export const MetadataKeys = {
 	 */
 	RuntimeParameters: "oja:runtime-parameters",
 
-	// ===== Multi-Injection =====
-
 	/**
 	 * Boolean indicating this token expects array of all implementations
 	 * Set during module registration with multi()
 	 */
 	IsMulti: "oja:is-multi",
-
-	// ===== Keyed Registration =====
 
 	/**
 	 * Map of keys to implementations for keyed() registration
@@ -52,16 +42,12 @@ export const MetadataKeys = {
 	 */
 	KeyedImplementations: "oja:keyed-implementations",
 
-	// ===== Interface Implementation Tracking =====
-
 	/**
 	 * Array of interface names this class implements
 	 * Used for detecting IDestroyable, IAsyncInitializable, etc.
 	 * Example: ["IDestroyable", "IAsyncInitializable"]
 	 */
 	Implements: "oja:implements",
-
-	// ===== Diagnostics & Debugging =====
 
 	/**
 	 * Human-readable service name for debugging
@@ -80,8 +66,6 @@ export const MetadataKeys = {
 	 * Used for debugging and leak detection
 	 */
 	ScopeId: "oja:scope-id",
-
-	// ===== Validation & Error Detection =====
 
 	/**
 	 * Boolean indicating this service has been validated

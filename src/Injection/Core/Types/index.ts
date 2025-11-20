@@ -26,8 +26,10 @@ export type {
 export type { FactoryFunction, KeyedFactory } from "./Factories";
 
 // Module types
-export { ContainerModule } from "./ContainerModule";
-export { ScopeModule } from "./ScopeModule";
+export { registerModule } from "./ContainerModule";
+export type { ModuleBuilder, ModuleDefinition, RegisteredModule } from "./ContainerModule";
+export { registerScopeModule } from "./ScopeModule";
+export type { ScopeBuilder, RegisteredScopeModule, ScopeModuleFactory } from "./ScopeModule";
 
 // Diagnostic types
 export type { ServiceDebugInfo, IScopeDebugInfo, ResolutionContext, ContainerErrorInfo } from "./Diagnostics";

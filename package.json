@@ -1,6 +1,6 @@
 {
   "name": "@oja-gamez/oja-injection",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Production-ready Dependency Injection container for Roblox TypeScript",
   "main": "out/init.luau",
   "types": "out/index.d.ts",

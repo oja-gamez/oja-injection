@@ -2,8 +2,6 @@
  * Lifecycle interface definitions for service initialization, updates, and cleanup.
  */
 
-// ===== Destruction Interfaces =====
-
 /**
  * Interface for services that need synchronous cleanup when destroyed.
  * Container automatically calls Destroy() when scope is destroyed.
@@ -37,8 +35,6 @@ export interface IDestroyable {
 	 */
 	Destroy(): void;
 }
-
-// ===== Initialization Interfaces =====
 
 /**
  * Interface for services that need synchronous initialization after construction.
@@ -108,8 +104,6 @@ export interface IWarmupable {
 	 */
 	Warmup(): void;
 }
-
-// ===== Update/Tick Interfaces =====
 
 /**
  * Interface for services that need per-frame updates.
