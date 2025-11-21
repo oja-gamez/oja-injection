@@ -28,7 +28,7 @@ const GameServices = registerModule((m) => {
 
 // Create container
 const container = new Container()
-container.use(GameServices)
+container.Use(GameServices)
 
 // Create scopes
 const PlayerToken = createToken<Player>("Player")
@@ -39,7 +39,7 @@ const PlayerScopeModule = registerScopeModule((scope, player: Player) => {
 })
 
 Players.PlayerAdded.Connect((player) => {
-  const scope = container.createScope(PlayerScopeModule, player)
+  const scope = container.CreateScope(PlayerScopeModule(player))
 
   player.AncestryChanged.Connect(() => {
     if (!player.IsDescendantOf(game)) {
@@ -101,7 +101,7 @@ class CombatSystem {
 const ILogger = createToken<Logger>("ILogger")
 
 const GameServices = registerModule((m) => {
-  m.single(ConsoleLogger).bind(ILogger)  // Implementation → Interface
+  m.single(ConsoleLogger).Bind(ILogger)  // Implementation → Interface
 })
 
 @Single()
@@ -146,18 +146,6 @@ Called every frame.
 class MovementController implements ITickable {
   Tick(deltaTime: number) {
     // Update movement
-  }
-}
-```
-
-### IWarmupable
-CPU-intensive pre-computation (singletons only).
-
-```ts
-@Single()
-class PathfindingService implements IWarmupable {
-  Warmup() {
-    // Build navmesh on startup
   }
 }
 ```
@@ -216,7 +204,7 @@ const PlayerScopeModule = registerScopeModule((scope, player: Player, profile: P
   scope.provideExternal(ProfileToken, profile)
 })
 
-const scope = container.createScope(PlayerScopeModule, player, profile)
+const scope = container.CreateScope(PlayerScopeModule(player, profile))
 ```
 
 ### External Data
@@ -292,7 +280,7 @@ class WeaponSystem {
 ```ts
 // Good - load async data first
 const profile = await ProfileStore.LoadAsync(player.UserId)
-const scope = container.createScope(PlayerScopeModule, player, profile)
+const scope = container.CreateScope(PlayerScopeModule(player, profile))
 
 // Bad - don't load async data in services
 @Scoped()
@@ -310,7 +298,7 @@ class BadService {
 const IDataStore = createToken<DataStore>("IDataStore")
 
 const GameServices = registerModule((m) => {
-  m.single(ProfileStoreImpl).bind(IDataStore)
+  m.single(ProfileStoreImpl).Bind(IDataStore)
 })
 
 @Single()
@@ -341,7 +329,7 @@ Players.PlayerRemoving.Connect((player) => {
 
 ### Scope Class
 
-The `Scope` class is returned by `container.createScope()` and provides lifecycle management for scoped services.
+The `Scope` class is returned by `container.CreateScope()` and provides lifecycle management for scoped services.
 
 **Methods:**
 
@@ -352,7 +340,7 @@ The `Scope` class is returned by `container.createScope()` and provides lifecycl
 **Example:**
 
 ```ts
-const scope = container.createScope(PlayerScopeModule, player)
+const scope = container.CreateScope(PlayerScopeModule(player))
 
 // Get scope ID for logging
 const scopeId = scope.GetScopeId()
