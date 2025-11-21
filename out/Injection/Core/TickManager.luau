@@ -143,7 +143,6 @@ do
 		end
 	end
 	function TickManager:TickAll(deltaTime)
-		-- Tick ITickable
 		for _, tickable in self._tickables do
 			TS.try(function()
 				tickable:Tick(deltaTime)
@@ -151,7 +150,6 @@ do
 				warn(`[TickManager] Error ticking service: {e}`)
 			end)
 		end
-		-- Tick IFixedTickable
 		for _, tickable in self._fixedTickables do
 			TS.try(function()
 				tickable:FixedTick(deltaTime)

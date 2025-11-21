@@ -35,9 +35,7 @@ local MetadataKeys = TS.import(script, script.Parent.Parent, "Reflection", "Meta
 ]]
 local function Single()
 	return function(target)
-		-- Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "singleton")
-		-- Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, target.name)
 		return target
 	end
@@ -81,9 +79,7 @@ end
 ]]
 local function Scoped()
 	return function(target)
-		-- Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "scoped")
-		-- Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, target.name)
 		return target
 	end
@@ -126,9 +122,7 @@ end
 ]]
 local function Factory()
 	return function(target)
-		-- Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "factory")
-		-- Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, target.name)
 		return target
 	end

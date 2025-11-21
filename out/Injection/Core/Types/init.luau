@@ -7,13 +7,6 @@ local exports = {}
 	 * Organized by concern for better discoverability.
 	 
 ]]
--- Constructor types
--- Token types
--- Lifetime types
--- Lifecycle interfaces
--- Factory types
--- Module types
 exports.registerModule = TS.import(script, script, "ContainerModule").registerModule
 exports.registerScopeModule = TS.import(script, script, "ScopeModule").registerScopeModule
--- Diagnostic types
 return exports

@@ -70,12 +70,9 @@ local tokenRegistry = {}
 	 
 ]=]
 local function createToken(description)
-	-- Create unique token (in Luau this is just a unique table/object)
-	-- We use a unique object since symbols don't exist in Luau
 	local token = {
 		__description = description,
 	}
-	-- Register for debugging (detect duplicate token names)
 	if tokenRegistry[token] ~= nil then
 		local existing = tokenRegistry[token]
 		error(`Token "{description}" already exists!\n` .. `Existing: {existing}\n` .. `This usually means you're creating the same token twice.\n` .. `Make sure each token is created only once and exported.`)

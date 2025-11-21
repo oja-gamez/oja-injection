@@ -53,7 +53,6 @@ do
 	end
 	function Container:Use(module)
 		local register = module:_getRegister()
-		-- Process single/scoped/factory registrations
 		local registrations = register:GetRegistrations()
 		for _, registration in registrations do
 			self:ValidateToken(registration.token)
@@ -70,7 +69,6 @@ do
 			end
 			self:RegisterSingle(registration.token, serviceReg)
 		end
-		-- Process multi-injection registrations
 		local multiRegistrations = register:GetMultiRegistrations()
 		for _, multiReg in multiRegistrations do
 			self:ValidateToken(multiReg.token)
@@ -78,7 +76,6 @@ do
 				self:RegisterMulti(multiReg.token, implementation)
 			end
 		end
-		-- Process keyed injection registrations
 		local keyedRegistrations = register:GetKeyedRegistrations()
 		for _, keyedReg in keyedRegistrations do
 			self:ValidateToken(keyedReg.token)
@@ -87,14 +84,11 @@ do
 		self._validated = false
 	end
 	function Container:Launch()
-		-- Validate all registrations before starting services
 		self:Validate()
 		for token, registrations in self._registrations do
 			for _, registration in registrations do
 				if registration.Lifetime == "singleton" then
-					-- When Implementation is undefined, the Token IS the implementation (class-only registration)
 					local impl = (registration.Implementation or registration.Token)
-					-- In Roblox-TS/Lua, methods are directly on the class, not on .prototype
 					local _start = impl.Start
 					if type(_start) == "function" then
 						self:Resolve(token)
@@ -197,7 +191,6 @@ do
 			for _, registration in registrations do
 				local lifetime = registration.Lifetime
 				local implementation = registration.Implementation or (registration.Token)
-				-- Get dependencies
 				local dependencyTokens = Reflect.GetMetadata(implementation, MetadataKeys.DependencyTokens)
 				local autowiredDeps = Reflect.GetMetadata(implementation, MetadataKeys.Dependencies)
 				local _array = {}

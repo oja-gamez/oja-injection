@@ -72,11 +72,8 @@ local MetadataKeys = TS.import(script, script.Parent.Parent, "Reflection", "Meta
 ]]
 local function Inject(token)
 	return function(target, _propertyKey, parameterIndex)
-		-- Get existing dependency tokens or create new array
 		local existingTokens = Reflect.GetOwnMetadata(target, MetadataKeys.DependencyTokens) or {}
-		-- Store token at this parameter index
 		existingTokens[parameterIndex + 1] = token
-		-- Update metadata
 		Reflect.DefineMetadata(target, MetadataKeys.DependencyTokens, existingTokens)
 	end
 end
@@ -139,15 +136,12 @@ end
 ]]
 local function RuntimeParameter()
 	return function(target, _propertyKey, parameterIndex)
-		-- Get existing runtime parameters or create new array
 		local existingParams = Reflect.GetOwnMetadata(target, MetadataKeys.RuntimeParameters) or {}
-		-- Add this parameter index
 		local _parameterIndex = parameterIndex
 		if not (table.find(existingParams, _parameterIndex) ~= nil) then
 			local _parameterIndex_1 = parameterIndex
 			table.insert(existingParams, _parameterIndex_1)
 		end
-		-- Update metadata
 		Reflect.DefineMetadata(target, MetadataKeys.RuntimeParameters, existingParams)
 	end
 end
