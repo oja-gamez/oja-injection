@@ -106,7 +106,7 @@ do
 		table.insert(_exp, childScope)
 		return childScope
 	end
-	function Scope:ProvideRuntime(token, instance)
+	function Scope:ProvideExternal(token, instance)
 		if self._destroyed then
 			error(`Cannot provide to destroyed scope: {self._scopeId}`)
 		end

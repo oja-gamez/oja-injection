@@ -142,12 +142,10 @@ do
 	function Container:CreateScope(module)
 		local register = module:_getRegister()
 		local scope = Scope.new(self, self._tickManager, nil)
-		-- Provide external data
 		local externals = register:GetExternals()
 		for token, instance in pairs(externals) do
-			scope:ProvideRuntime(token, instance)
+			scope:ProvideExternal(token, instance)
 		end
-		-- Resolve root if specified
 		local root = register:GetRoot()
 		if root then
 			scope:Resolve(root)

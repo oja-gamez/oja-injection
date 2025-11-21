@@ -69,41 +69,32 @@ export class Scope {
 			error(`Cannot resolve from destroyed scope: ${this._scopeId}`);
 		}
 
-		// Check external instances first
 		if (this._externalInstances.has(token)) {
 			return this._externalInstances.get(token) as T;
 		}
 
-		// Check scoped instance cache
 		if (this._scopedInstances.has(token)) {
 			return this._scopedInstances.get(token) as T;
 		}
 
-		// Get registration from container
 		const registration = this._container.GetRegistration(token);
 		if (!registration) {
-			// Try parent scope
 			if (this._parent) {
 				return this._parent.ResolveWithContext(token, context);
 			}
 			ContainerErrors.MissingRegistration(token, context);
 		}
 
-		// Resolve based on lifetime
 		if (registration.Lifetime === "singleton") {
-			// Delegate to container (which will use context)
 			return this._container.Resolve(token);
 		} else if (registration.Lifetime === "scoped") {
-			// Create and cache in this scope
 			const instance = this._container.CreateInstanceWithContext<T>(registration, context, this);
 			this._scopedInstances.set(token, instance);
 
-			// Track for lifecycle
 			this.TrackInstance(instance);
 
 			return instance;
 		} else {
-			// Factory - create new instance every time (untracked, caller manages lifecycle)
 			return this._container.CreateInstanceWithContext<T>(registration, context, this);
 		}
 	}
@@ -125,7 +116,7 @@ export class Scope {
 	 * Provides externally-created runtime data to the scope.
 	 * Public API exposed on IScope interface.
 	 */
-	ProvideRuntime<T>(token: Token<T> | Constructor<T>, instance: T): void {
+	ProvideExternal<T>(token: Token<T> | Constructor<T>, instance: T): void {
 		if (this._destroyed) {
 			error(`Cannot provide to destroyed scope: ${this._scopeId}`);
 		}
@@ -140,7 +131,6 @@ export class Scope {
 	Destroy(): void {
 		if (this._destroyed) return;
 
-		// Unregister all tickables from global TickManager
 		for (const tickable of this._tickables) {
 			this._tickManager.UnregisterTickable(tickable);
 		}
@@ -151,12 +141,10 @@ export class Scope {
 			this._tickManager.UnregisterRenderTickable(tickable);
 		}
 
-		// Destroy child scopes first
 		for (const child of this._childScopes) {
 			child.Destroy();
 		}
 
-		// Call Destroy() on all IDestroyable services
 		for (const destroyable of this._destroyables) {
 			try {
 				destroyable.Destroy();
@@ -165,7 +153,6 @@ export class Scope {
 			}
 		}
 
-		// Clear caches
 		this._scopedInstances.clear();
 		this._externalInstances.clear();
 		this._childScopes = [];
@@ -183,7 +170,6 @@ export class Scope {
 	DebugServices(): IScopeDebugInfo {
 		const services: IScopeDebugInfo["Services"] = [];
 
-		// Add scoped instances
 		for (const [token, instance] of this._scopedInstances) {
 			services.push({
 				Name: this.GetTokenName(token),
@@ -193,7 +179,6 @@ export class Scope {
 			});
 		}
 
-		// Add external instances
 		for (const [token, instance] of this._externalInstances) {
 			services.push({
 				Name: this.GetTokenName(token),
@@ -231,7 +216,6 @@ export class Scope {
 	 * @internal
 	 */
 	StartAll(): void {
-		// Collect all instances from both maps
 		const allInstances = [] as defined[];
 		this._scopedInstances.forEach((instance) => {
 			allInstances.push(instance as defined);
@@ -240,7 +224,6 @@ export class Scope {
 			allInstances.push(instance as defined);
 		});
 
-		// Call Start() on all IStartable instances
 		for (const instance of allInstances) {
 			if (this.IsStartable(instance)) {
 				try {
@@ -258,24 +241,20 @@ export class Scope {
 	 * @internal
 	 */
 	private TrackInstance(instance: unknown): void {
-		// Check for IDestroyable
 		if (this.IsDestroyable(instance)) {
 			this._destroyables.push(instance);
 		}
 
-		// Check for ITickable - register with global TickManager
 		if (this.IsTickable(instance)) {
 			this._tickables.push(instance);
 			this._tickManager.RegisterTickable(instance);
 		}
 
-		// Check for IFixedTickable - register with global TickManager
 		if (this.IsFixedTickable(instance)) {
 			this._fixedTickables.push(instance);
 			this._tickManager.RegisterFixedTickable(instance);
 		}
 
-		// Check for IRenderTickable - register with global TickManager
 		if (this.IsRenderTickable(instance)) {
 			this._renderTickables.push(instance);
 			this._tickManager.RegisterRenderTickable(instance);

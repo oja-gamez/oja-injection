@@ -68,13 +68,10 @@ const tokenRegistry = new Map<Token, string>();
  * constructor(@Inject(IAbilityProto) createAbility: KeyedFactory<IAbilityPrototype>) {}
  */
 export function createToken<T>(description: string): Token<T> {
-	// Create unique token (in Luau this is just a unique table/object)
-	// We use a unique object since symbols don't exist in Luau
 	const token = {
 		__description: description,
 	} as Token<T>;
 
-	// Register for debugging (detect duplicate token names)
 	if (tokenRegistry.has(token)) {
 		const existing = tokenRegistry.get(token)!;
 		error(

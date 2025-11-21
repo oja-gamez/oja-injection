@@ -153,7 +153,6 @@ export class TickManager {
 	 * Ticks all registered tickables.
 	 */
 	private TickAll(deltaTime: number): void {
-		// Tick ITickable
 		for (const tickable of this._tickables) {
 			try {
 				tickable.Tick(deltaTime);
@@ -162,7 +161,6 @@ export class TickManager {
 			}
 		}
 
-		// Tick IFixedTickable
 		for (const tickable of this._fixedTickables) {
 			try {
 				tickable.FixedTick(deltaTime);

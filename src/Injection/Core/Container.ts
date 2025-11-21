@@ -63,7 +63,6 @@ export class Container {
 	Use(module: RegisteredModule): void {
 		const register = module._getRegister();
 
-		// Process single/scoped/factory registrations
 		const registrations = register.GetRegistrations();
 		for (const registration of registrations) {
 			this.ValidateToken(registration.token);
@@ -82,7 +81,6 @@ export class Container {
 			this.RegisterSingle(registration.token, serviceReg);
 		}
 
-		// Process multi-injection registrations
 		const multiRegistrations = register.GetMultiRegistrations();
 		for (const multiReg of multiRegistrations) {
 			this.ValidateToken(multiReg.token);
@@ -91,7 +89,6 @@ export class Container {
 			}
 		}
 
-		// Process keyed injection registrations
 		const keyedRegistrations = register.GetKeyedRegistrations();
 		for (const keyedReg of keyedRegistrations) {
 			this.ValidateToken(keyedReg.token);
@@ -121,15 +118,12 @@ export class Container {
 	 * Scoped and factory services are never auto-resolved.
 	 */
 	Launch(): void {
-		// Validate all registrations before starting services
 		this.Validate();
 
 		for (const [token, registrations] of this._registrations) {
 			for (const registration of registrations) {
 				if (registration.Lifetime === "singleton") {
-					// When Implementation is undefined, the Token IS the implementation (class-only registration)
 					const impl = (registration.Implementation || registration.Token) as { Start?: unknown };
-					// In Roblox-TS/Lua, methods are directly on the class, not on .prototype
 					if (typeIs(impl.Start, "function")) {
 						this.Resolve(token);
 						break;
@@ -217,13 +211,11 @@ export class Container {
 		const register = module._getRegister();
 		const scope = new Scope(this, this._tickManager, undefined) as Scope;
 
-		// Provide external data
 		const externals = register.GetExternals();
 		for (const [token, instance] of pairs(externals)) {
-			scope.ProvideRuntime(token, instance);
+			scope.ProvideExternal(token, instance);
 		}
 
-		// Resolve root if specified
 		const root = register.GetRoot();
 		if (root) {
 			scope.Resolve(root);
@@ -320,7 +312,6 @@ export class Container {
 				const lifetime = registration.Lifetime;
 				const implementation = registration.Implementation || (registration.Token as Constructor);
 
-				// Get dependencies
 				const dependencyTokens = Reflect.GetMetadata<(Token | Constructor | undefined)[]>(
 					implementation,
 					MetadataKeys.DependencyTokens,

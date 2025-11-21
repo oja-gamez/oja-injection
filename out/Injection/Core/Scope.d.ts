@@ -50,7 +50,7 @@ export declare class Scope {
      * Provides externally-created runtime data to the scope.
      * Public API exposed on IScope interface.
      */
-    ProvideRuntime<T>(token: Token<T> | Constructor<T>, instance: T): void;
+    ProvideExternal<T>(token: Token<T> | Constructor<T>, instance: T): void;
     /**
      * Synchronously destroys the scope and all scoped instances.
      */

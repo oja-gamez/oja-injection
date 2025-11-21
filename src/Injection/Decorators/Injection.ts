@@ -70,13 +70,10 @@ import type { Token } from "../Core/Types";
  */
 export function Inject(token: Token) {
 	return function (target: object, _propertyKey: string | symbol | undefined, parameterIndex: number) {
-		// Get existing dependency tokens or create new array
 		const existingTokens = Reflect.GetOwnMetadata<Token[]>(target, MetadataKeys.DependencyTokens) || [];
 
-		// Store token at this parameter index
 		existingTokens[parameterIndex] = token;
 
-		// Update metadata
 		Reflect.DefineMetadata(target, MetadataKeys.DependencyTokens, existingTokens);
 	};
 }
@@ -138,16 +135,12 @@ export function Inject(token: Token) {
  */
 export function RuntimeParameter() {
 	return function (target: object, _propertyKey: string | symbol | undefined, parameterIndex: number) {
-		// Get existing runtime parameters or create new array
 		const existingParams = Reflect.GetOwnMetadata<number[]>(target, MetadataKeys.RuntimeParameters) || [];
 
-		// Add this parameter index
 		if (!existingParams.includes(parameterIndex)) {
 			existingParams.push(parameterIndex);
 		}
 
-		// Update metadata
 		Reflect.DefineMetadata(target, MetadataKeys.RuntimeParameters, existingParams);
 	};
 }
-

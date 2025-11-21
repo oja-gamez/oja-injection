@@ -33,10 +33,7 @@ import type { Constructor, Lifetime } from "../Core/Types";
  */
 export function Single() {
 	return function <T extends Constructor>(target: T) {
-		// Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "singleton" as Lifetime);
-
-		// Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, (target as unknown as { name: string }).name);
 
 		return target;
@@ -80,10 +77,7 @@ export function Single() {
  */
 export function Scoped() {
 	return function <T extends Constructor>(target: T) {
-		// Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "scoped" as Lifetime);
-
-		// Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, (target as unknown as { name: string }).name);
 
 		return target;
@@ -126,10 +120,7 @@ export function Scoped() {
  */
 export function Factory() {
 	return function <T extends Constructor>(target: T) {
-		// Store lifetime metadata on the class
 		Reflect.DefineMetadata(target, MetadataKeys.Lifetime, "factory" as Lifetime);
-
-		// Store service name for debugging
 		Reflect.DefineMetadata(target, MetadataKeys.ServiceName, (target as unknown as { name: string }).name);
 
 		return target;
