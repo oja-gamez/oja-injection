@@ -699,6 +699,7 @@ export class Container {
 	 */
 	private ResolveMulti<T>(token: Token<T>, scope?: Scope): T[] {
 		const implementations = this._multiRegistrations.get(token) || [];
+		const context = ContainerErrors.CreateContext();
 		return implementations.map((impl) => {
 			const reg: ServiceRegistration = {
 				Token: token,
@@ -706,7 +707,7 @@ export class Container {
 				Lifetime: "singleton",
 				Type: "multi",
 			};
-			return this.CreateInstance<T>(reg, scope);
+			return this.CreateInstanceWithContext<T>(reg, context, scope);
 		});
 	}
 
@@ -743,6 +744,7 @@ export class Container {
 				);
 			}
 
+			const context = ContainerErrors.CreateContext();
 			const reg: ServiceRegistration = {
 				Token: token,
 				Implementation: impl,
@@ -750,7 +752,7 @@ export class Container {
 				Type: "keyed",
 				Key: key,
 			};
-			return this.CreateInstance<T>(reg, scope);
+			return this.CreateInstanceWithContext<T>(reg, context, scope);
 		};
 	}
 

@@ -279,10 +279,6 @@ do
 			end
 		end
 	end
-	function Container:CreateInstance(registration, scope, runtimeArgs)
-		local context = ContainerErrors:CreateContext()
-		return self:CreateInstanceWithContext(registration, context, scope, runtimeArgs)
-	end
 	function Container:CreateInstanceWithContext(registration, context, scope, runtimeArgs)
 		local token = registration.Token
 		local implementation = registration.Implementation or token
@@ -312,10 +308,6 @@ do
 		if _exitType then
 			return unpack(_returns)
 		end
-	end
-	function Container:ResolveDependencies(constructor, scope, runtimeArgs)
-		local context = ContainerErrors:CreateContext()
-		return self:ResolveDependenciesWithContext(constructor, context, scope, runtimeArgs)
 	end
 	function Container:ResolveDependenciesWithContext(constructor, context, scope, runtimeArgs)
 		local dependencyTokens = Reflect.GetMetadata(constructor, MetadataKeys.DependencyTokens)
@@ -404,10 +396,6 @@ do
 				error(`[OjaInjection] LifecycleViolation: IWarmupable can only be used on singleton services\n` .. `Service lifetime: {lifetime}\n` .. `IWarmupable is for CPU-intensive pre-computation on singletons only.`)
 			end
 		end
-	end
-	function Container:ResolveDependency(token, scope)
-		local context = ContainerErrors:CreateContext()
-		return self:ResolveDependencyWithContext(token, context, scope)
 	end
 	function Container:ResolveDependencyWithContext(token, context, scope)
 		self:ValidateToken(token)
@@ -525,6 +513,7 @@ do
 			_condition = {}
 		end
 		local implementations = _condition
+		local context = ContainerErrors:CreateContext()
 		-- ▼ ReadonlyArray.map ▼
 		local _newValue = table.create(#implementations)
 		local _callback = function(impl)
@@ -534,7 +523,7 @@ do
 				Lifetime = "singleton",
 				Type = "multi",
 			}
-			return self:CreateInstance(reg, scope)
+			return self:CreateInstanceWithContext(reg, context, scope)
 		end
 		for _k, _v in implementations do
 			_newValue[_k] = _callback(_v, _k - 1, implementations)
@@ -561,6 +550,7 @@ do
 				end
 				error(`[OjaInjection] Keyed injection failed\n` .. `Token: {self:GetTokenName(token)}\n` .. `Key: "{key}"\n` .. `Available keys: {table.concat(availableKeys, ", ")}`)
 			end
+			local context = ContainerErrors:CreateContext()
 			local reg = {
 				Token = token,
 				Implementation = impl,
@@ -568,7 +558,7 @@ do
 				Type = "keyed",
 				Key = key,
 			}
-			return self:CreateInstance(reg, scope)
+			return self:CreateInstanceWithContext(reg, context, scope)
 		end
 	end
 	function Container:GetTokenName(token)

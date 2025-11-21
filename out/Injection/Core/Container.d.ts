@@ -171,17 +171,6 @@ export declare class Container {
      */
     private ValidateRegistration;
     /**
-     * Creates an instance of a service with dependency injection (legacy method without context).
-     *
-     * @param registration - The service registration to instantiate
-     * @param scope - Optional scope for resolving scoped dependencies
-     * @param runtimeArgs - Optional runtime arguments for @Runtime decorated parameters
-     * @returns The created instance with all dependencies injected
-     *
-     * @internal
-     */
-    CreateInstance<T>(registration: ServiceRegistration, scope?: Scope, runtimeArgs?: unknown[]): T;
-    /**
      * Creates an instance of a service with dependency injection and resolution context.
      *
      * Handles the complete instantiation process including:
@@ -205,18 +194,6 @@ export declare class Container {
      * @internal
      */
     CreateInstanceWithContext<T>(registration: ServiceRegistration, context: ResolutionContext, scope?: Scope, runtimeArgs?: unknown[]): T;
-    /**
-     * Resolves all constructor dependencies for a service (legacy method without context).
-     *
-     * @param constructor - The constructor whose dependencies to resolve
-     * @param scope - Optional scope for resolving scoped dependencies
-     * @param runtimeArgs - Optional runtime arguments for @Runtime decorated parameters
-     * @returns Array of resolved dependency instances
-     *
-     * @internal
-     * @deprecated Use ResolveDependenciesWithContext for better error diagnostics
-     */
-    private ResolveDependencies;
     /**
      * Resolves all constructor dependencies for a service with resolution context.
      *
@@ -266,17 +243,6 @@ export declare class Container {
      * @throws Error if non-singleton service implements IWarmupable
      */
     private ValidateLifecycleInterfaces;
-    /**
-     * Resolves a single dependency (legacy method without context).
-     *
-     * @param token - The service token or constructor to resolve
-     * @param scope - Optional scope for resolving scoped dependencies
-     * @returns The resolved service instance
-     *
-     * @internal
-     * @deprecated Use ResolveDependencyWithContext for better error diagnostics
-     */
-    ResolveDependency<T>(token: Token<T> | Constructor<T>, scope?: Scope): T;
     /**
      * Resolves a single dependency with resolution context.
      *
