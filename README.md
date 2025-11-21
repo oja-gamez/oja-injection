@@ -1,11 +1,11 @@
-# @oja-gamez/oja-injection
+# @zeemontana/oja-injection
 
 Opinionated dependency injection container for Roblox TypeScript.
 
 ## Usage
 
 ```ts
-import { Container, registerModule, registerScopeModule, Single, Scoped, Inject, createToken } from "@oja-gamez/oja-injection"
+import { Container, registerModule, registerScopeModule, Single, Scoped, Inject, createToken } from "@zeemontana/oja-injection"
 
 // Define services
 @Single()

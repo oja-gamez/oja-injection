@@ -1,6 +1,6 @@
 {
-  "name": "@oja-gamez/oja-injection",
-  "version": "0.1.1",
+  "name": "@zeemontana/oja-injection",
+  "version": "0.1.4",
   "description": "Production-ready Dependency Injection container for Roblox TypeScript",
   "main": "out/init.luau",
   "types": "out/index.d.ts",
@@ -25,7 +25,7 @@
     "directory": "packages/oja-injection"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "restricted"
   },
   "keywords": [
     "roblox",
@@ -42,11 +42,13 @@
     "url": "https://github.com/oja-gamez/oja-game-kit/issues"
   },
   "homepage": "https://github.com/oja-gamez/oja-game-kit/tree/main/packages/oja-injection#readme",
-  "dependencies": {
-    "@rbxts/services": "^1.6.0",
-    "@rbxts/types": "^1.0.891"
+  "peerDependencies": {
+    "@rbxts/services": "^1.5.0",
+    "@rbxts/types": "^1.0.0"
   },
   "devDependencies": {
+    "@rbxts/services": "^1.6.0",
+    "@rbxts/types": "^1.0.891",
     "@rbxts/compiler-types": "^3.0.0-types.0",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",

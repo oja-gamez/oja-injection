@@ -5,8 +5,52 @@ Dependency injection container for Roblox TypeScript.
 ## Installation
 
 ```bash
-npm install @oja-gamez/oja-injection
+npm install @zeemontana/oja-injection
 ```
+
+## Quick Start - THE RIGHT WAY
+
+**Step 1: Define services with decorators**
+```ts
+import { Single, Scoped, IStartable } from "@zeemontana/oja-injection"
+
+@Single()
+class MyManager implements IStartable {
+  Start() {
+    print("MyManager started!")
+  }
+}
+
+@Scoped()
+class PlayerService {
+  // Per-player service
+}
+```
+
+**Step 2: Register in a module**
+```ts
+import { registerModule } from "@zeemontana/oja-injection"
+
+const GameModule = registerModule((m) => {
+  m.single(MyManager)
+  m.scoped(PlayerService)
+})
+```
+
+**Step 3: Bootstrap (DO THIS ONCE)**
+```ts
+import { Container } from "@zeemontana/oja-injection"
+
+const container = new Container()
+container.Use(GameModule)
+container.Launch()  // ← Auto-starts all IStartable singletons
+
+export { container }  // Export for creating scopes
+```
+
+**THAT'S IT.** Don't call `new` on your services. Don't manually resolve. Just `Launch()` and you're done.
+
+---
 
 ## Core Classes
 
@@ -156,7 +200,7 @@ IScopeDebugInfo          // Debug info for entire scope
 ## Complete Example
 
 ```ts
-import { Container, createToken, registerModule, registerScopeModule, Single, Scoped, Inject } from "@oja-gamez/oja-injection"
+import { Container, createToken, registerModule, registerScopeModule, Single, Scoped, Inject } from "@zeemontana/oja-injection"
 
 // 1. Define tokens for interfaces
 const ILogger = createToken<ILogger>("ILogger")
