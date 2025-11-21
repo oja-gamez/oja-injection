@@ -386,21 +386,6 @@ export class Container {
 	}
 
 	/**
-	 * Creates an instance of a service with dependency injection (legacy method without context).
-	 *
-	 * @param registration - The service registration to instantiate
-	 * @param scope - Optional scope for resolving scoped dependencies
-	 * @param runtimeArgs - Optional runtime arguments for @Runtime decorated parameters
-	 * @returns The created instance with all dependencies injected
-	 *
-	 * @internal
-	 */
-	CreateInstance<T>(registration: ServiceRegistration, scope?: Scope, runtimeArgs?: unknown[]): T {
-		const context = ContainerErrors.CreateContext();
-		return this.CreateInstanceWithContext<T>(registration, context, scope, runtimeArgs);
-	}
-
-	/**
 	 * Creates an instance of a service with dependency injection and resolution context.
 	 *
 	 * Handles the complete instantiation process including:
@@ -453,26 +438,6 @@ export class Container {
 			}
 			throw e;
 		}
-	}
-
-	/**
-	 * Resolves all constructor dependencies for a service (legacy method without context).
-	 *
-	 * @param constructor - The constructor whose dependencies to resolve
-	 * @param scope - Optional scope for resolving scoped dependencies
-	 * @param runtimeArgs - Optional runtime arguments for @Runtime decorated parameters
-	 * @returns Array of resolved dependency instances
-	 *
-	 * @internal
-	 * @deprecated Use ResolveDependenciesWithContext for better error diagnostics
-	 */
-	private ResolveDependencies(
-		constructor: Constructor,
-		scope?: Scope,
-		runtimeArgs?: unknown[],
-	): unknown[] {
-		const context = ContainerErrors.CreateContext();
-		return this.ResolveDependenciesWithContext(constructor, context, scope, runtimeArgs);
 	}
 
 	/**
@@ -604,21 +569,6 @@ export class Container {
 				);
 			}
 		}
-	}
-
-	/**
-	 * Resolves a single dependency (legacy method without context).
-	 *
-	 * @param token - The service token or constructor to resolve
-	 * @param scope - Optional scope for resolving scoped dependencies
-	 * @returns The resolved service instance
-	 *
-	 * @internal
-	 * @deprecated Use ResolveDependencyWithContext for better error diagnostics
-	 */
-	ResolveDependency<T>(token: Token<T> | Constructor<T>, scope?: Scope): T {
-		const context = ContainerErrors.CreateContext();
-		return this.ResolveDependencyWithContext(token, context, scope);
 	}
 
 	/**
